@@ -2,7 +2,7 @@
 
 A Spring AI advisor that implements **LLM-as-a-Judge** evaluation with automatic retry.
 
-<img style="display: block; margin: auto;" src="best-agentic-harness.png" width="600" />
+<img style="display: block; margin: auto;" src="best-agentic-harness.png" width="800" />
 
 ## BestAgenticHarnessAdvisor
 
