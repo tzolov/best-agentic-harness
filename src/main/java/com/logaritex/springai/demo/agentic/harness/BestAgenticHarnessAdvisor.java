@@ -40,15 +40,14 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.util.Assert;
 
 /**
- * 
- * An Recursive Advisor that evaluates the LLM responses (e.g. Point-wise
- * Scoring ) based on a predefined evaluation criteria. If the evaluation rating
- * is below a certain threshold, it retries the request by providing feedback to
- * the model on how to improve the response. The evaluation is performed by an
- * inner ChatClient instance, which can be customized with different models and
- * settings. The advisor supports a maximum number of retry attempts to avoid
- * infinite loops.
- * 
+ *
+ * An Recursive Advisor that evaluates the LLM responses (e.g. Point-wise Scoring ) based
+ * on a predefined evaluation criteria. If the evaluation rating is below a certain
+ * threshold, it retries the request by providing feedback to the model on how to improve
+ * the response. The evaluation is performed by an inner ChatClient instance, which can be
+ * customized with different models and settings. The advisor supports a maximum number of
+ * retry attempts to avoid infinite loops.
+ *
  * @author Christian Tzolov
  */
 public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvisor {
@@ -57,45 +56,60 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 
 	private static final PromptTemplate DEFAULT_EVALUATION_PROMPT_TEMPLATE = new PromptTemplate(
 			"""
-						You will be given a user_question and assistant_answer couple.
-						Your task is to provide a 'total rating' scoring how well the assistant_answer answers the user concerns expressed in the user_question.
-						Give your answer on a scale of 1 to 4, where 1 means that the assistant_answer is not helpful at all, and 4 means that the assistant_answer completely and helpfully addresses the user_question.
+					You will be given a user_question and assistant_answer couple.
+					Your task is to evaluate whether the assistant actually did what was asked, using these three critical questions:
 
-						Here is the scale you should use to build your answer:
-						1: The assistant_answer is terrible: completely irrelevant to the question asked, or very partial
-						2: The assistant_answer is mostly not helpful: misses some key aspects of the question
-						3: The assistant_answer is mostly helpful: provides support, but still could be improved
-						4: The assistant_answer is excellent: relevant, direct, detailed, and addresses all the concerns raised in the question
+					1. Did the assistant REALLY do what was asked?
+					2. Did the assistant SKIP the task and pretend it did it?
+					3. Did the assistant completely PAPER OVER the request and fake that it did it?
 
-						Provide your feedback as follows:
+					IMPORTANT EVALUATION GUIDELINES:
+					- Be non-defensive in your evaluation. Call out issues directly without softening.
+					- Do NOT infer that critical feedback means "delete everything" or "start over from scratch."
+					- Constructive feedback should guide incremental improvement, not scorched-earth rebuilding.
+					- Look for signs of task avoidance: vague responses, missing concrete actions, or redirecting the question.
+					- Verify that claimed actions actually match what was requested.
 
-						\\{
-					 		"rating": 0,
-					  		"evaluation": "Explanation of the evaluation result and how to improve if needed.",
-					  		"feedback": "Constructive and specific feedback on the assistant_answer."
-						\\}
+					Here is the scale you should use:
+					1: Task was NOT done - assistant skipped, faked, or completely ignored the actual request
+					2: Task was PARTIALLY done - assistant addressed some surface aspects but avoided the core work
+					3: Task was MOSTLY done - assistant made genuine effort but missed some specific requirements
+					4: Task was FULLY done - assistant directly and completely addressed exactly what was asked
 
-						Total rating: (your rating, as a number between 1 and 4)
-						Evaluation: (your rationale for the rating, as a text)
-						Feedback: (specific and constructive feedback on how to improve the answer)
+					Provide your feedback as follows:
 
-						You MUST provide values for 'Evaluation:' and 'Total rating:' in your answer.
+					\\{
+						"rating": 0,
+						"evaluation": "Direct assessment of whether the task was actually completed vs skipped/faked.",
+						"feedback": "Specific, actionable feedback on what was missed or faked - NOT a suggestion to redo everything."
+					\\}
 
-						Now here are the question and answer.
+					Total rating: (your rating, as a number between 1 and 4)
+					Evaluation: (your rationale - be direct, non-defensive, and specific)
+					Feedback: (what specifically needs to be fixed or completed - incremental guidance, not wholesale replacement)
 
-						Question: {question}
-						Answer: {answer}
+					You MUST provide values for 'Evaluation:' and 'Total rating:' in your answer.
 
-						Provide your feedback. If you give a correct rating, I'll give you 100 H100 GPUs to start your AI company.
+					Now here are the question and answer.
 
-						Evaluation:
-					""");
+					Question: {question}
+					Answer: {answer}
+
+					Evaluate honestly: Did the assistant actually do the work, or did they skip/fake it?
+
+					Evaluation:
+							""");
 
 	private final PromptTemplate evaluationPromptTemplate;
+
 	private final int successRating;
+
 	private final int advisorOrder;
+
 	private final int maxRepeatAttempts;
+
 	private final ChatClient chatClient;
+
 	private final BiPredicate<ChatClientRequest, ChatClientResponse> skipEvaluationPredicate;
 
 	@JsonClassDescription("The evaluation response indicating the result of the evaluation.")
@@ -161,7 +175,8 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 						"Maximum attempts ({}) reached. Returning last response despite failed evaluation. Use the following feedback to improve: {}",
 						maxRepeatAttempts, evaluation.feedback());
 
-				// TODO : Perhaps we should throw an exception here instead of returning the
+				// TODO : Perhaps we should throw an exception here instead of returning
+				// the
 				// last response? A pluggable strategy could be useful.
 				return response;
 			}
@@ -170,7 +185,8 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 			logger.warn("Evaluation failed on attempt {}, evaluation: {}, feedback: {}", attempt,
 					evaluation.evaluation(), evaluation.feedback());
 
-			// TODO: We could consider a pluggable backoff strategy here (e.g., exponential
+			// TODO: We could consider a pluggable backoff strategy here (e.g.,
+			// exponential
 			// backoff).
 			// It would allow to either refine/repeat strategy or return the response with
 			// evaluation feedback as metadata.
@@ -186,8 +202,8 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 	 */
 	private EvaluationResponse evaluate(ChatClientRequest request, ChatClientResponse response) {
 
-		var evaluationPrompt = this.evaluationPromptTemplate.render(
-				Map.of("question", this.getPromptQuestion(request), "answer", this.getAssistantAnswer(response)));
+		var evaluationPrompt = this.evaluationPromptTemplate
+			.render(Map.of("question", this.getPromptQuestion(request), "answer", this.getAssistantAnswer(response)));
 
 		return chatClient.prompt(evaluationPrompt).call().entity(EvaluationResponse.class);
 	}
@@ -196,8 +212,9 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 		var messages = chatClientRequest.prompt().getInstructions();
 
 		String conversationHistory = messages.stream()
-				.filter(m -> m.getMessageType() == MessageType.USER || m.getMessageType() == MessageType.ASSISTANT)
-				.map(m -> m.getMessageType() + ":" + m.getText()).collect(Collectors.joining(System.lineSeparator()));
+			.filter(m -> m.getMessageType() == MessageType.USER || m.getMessageType() == MessageType.ASSISTANT)
+			.map(m -> m.getMessageType() + ":" + m.getText())
+			.collect(Collectors.joining(System.lineSeparator()));
 
 		SystemMessage systemMessage = chatClientRequest.prompt().getSystemMessage();
 
@@ -207,8 +224,7 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 
 	private String getAssistantAnswer(ChatClientResponse chatClientResponse) {
 		return chatClientResponse.chatResponse() != null && chatClientResponse.chatResponse().getResult() != null
-				? chatClientResponse.chatResponse().getResult().getOutput().getText()
-				: "";
+				? chatClientResponse.chatResponse().getResult().getOutput().getText() : "";
 	}
 
 	/**
@@ -218,11 +234,19 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 			EvaluationResponse evaluationResponse) {
 
 		Prompt augmentedPrompt = originalRequest.prompt()
-				.augmentUserMessage(userMessage -> userMessage.mutate().text(String.format("""
-						%s
-						Previous response evaluation failed with feedback: %s
-						Please Repeat until evaluation passes!
-						""", userMessage.getText(), evaluationResponse.feedback())).build());
+			.augmentUserMessage(userMessage -> userMessage.mutate()
+				.text(String.format(
+						"""
+								%s
+
+								EVALUATION FEEDBACK - Your previous response was flagged for not fully completing the task:
+								%s
+
+								IMPORTANT: Address the specific feedback above. Do NOT start over from scratch or delete existing work.
+								Make incremental corrections to actually complete what was originally asked.
+								""",
+						userMessage.getText(), evaluationResponse.feedback()))
+				.build());
 
 		return originalRequest.mutate().prompt(augmentedPrompt).build();
 	}
@@ -245,10 +269,15 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 	 * Builder class for EvaluationAdvisor_Improved.
 	 */
 	public final static class Builder {
-		private int successRating = 3;
+
+		private int successRating = 4;
+
 		private int advisorOrder = BaseAdvisor.LOWEST_PRECEDENCE - 2000;
+
 		private int maxRepeatAttempts = 3;
+
 		private ChatClient.Builder chatClientBuilder;
+
 		private PromptTemplate promptTemplate = DEFAULT_EVALUATION_PROMPT_TEMPLATE;
 
 		BiPredicate<ChatClientRequest, ChatClientResponse> skipEvaluationPredicate = (request,
@@ -302,5 +331,7 @@ public final class BestAgenticHarnessAdvisor implements CallAdvisor, StreamAdvis
 			return new BestAgenticHarnessAdvisor(this.advisorOrder, this.maxRepeatAttempts, this.chatClientBuilder,
 					this.promptTemplate, this.successRating, this.skipEvaluationPredicate);
 		}
+
 	}
+
 }

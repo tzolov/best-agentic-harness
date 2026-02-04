@@ -1,6 +1,7 @@
 package com.logaritex.springai.demo.agentic.harness;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,16 +18,21 @@ public class Application {
 	CommandLineRunner commandLineRunner(ChatClient.Builder chatClientBuilder) {
 		return args -> {
 
-			ChatClient chatClient = chatClientBuilder
-				.defaultAdvisors(BestAgenticHarnessAdvisor.builder()
-					.chatClientBuilder(chatClientBuilder.clone())
-					.maxRepeatAttempts(3)
-					.successRating(4)
-					.order(0)
-					.build())
-				.build();
+			// Reuse the main LLM model as a judge too
+			var judgeChatClientBuilder = chatClientBuilder.clone()
+				.defaultAdvisors(new MyLoggingAdvisor(0, "[EVALUATOR]"));
 
-			var answer = chatClient.prompt("What is current weather in Paris?").call().content();
+			ChatClient chatClient = chatClientBuilder // @formatter:off
+				.defaultAdvisors(
+					BestAgenticHarnessAdvisor.builder()
+						.chatClientBuilder(judgeChatClientBuilder)
+						.order(BaseAdvisor.HIGHEST_PRECEDENCE + 1000)
+						.build(),
+					new MyLoggingAdvisor(BaseAdvisor.LOWEST_PRECEDENCE + 2000, "[MAIN]"),
+					new ChaosResponseAdvisor(BaseAdvisor.LOWEST_PRECEDENCE + 3000, 0.8))
+				.build(); // @formatter:on
+
+			var answer = chatClient.prompt("What is the capital of Bulgaria?").call().content();
 
 			System.out.println(answer);
 		};
