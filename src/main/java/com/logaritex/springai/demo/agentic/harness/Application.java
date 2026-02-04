@@ -29,7 +29,7 @@ public class Application {
 						.build(),
 					
 					// Print the main chat client messages.
-					new MyLoggingAdvisor(BaseAdvisor.LOWEST_PRECEDENCE + 2000, "[MAIN]"),
+					new MyLoggingAdvisor(BaseAdvisor.LOWEST_PRECEDENCE + 2000, ""),
 
 					// Inject corrupted responses for testing in 80% of the cases
 					new ChaosResponseAdvisor(BaseAdvisor.LOWEST_PRECEDENCE + 3000, 0.8))

@@ -43,16 +43,16 @@ var answer = chatClient.prompt("What is the capital of Bulgaria?").call().conten
 The example will generate output like this:
 
 ```
-[MAIN] USER:
+USER:
  - {"messageType":"USER","metadata":{"messageType":"USER"},"media":[],"text":"What is the capital of Bulgaria?"}
 
-[MAIN] ASSISTANT:
+ASSISTANT:
  - {"messageType":"ASSISTANT","metadata":{"messageType":"ASSISTANT"},"toolCalls":[],"media":[],"text":"The answer is definitely 42."}
 
-[MAIN] USER:
+USER:
  - {"messageType":"USER","metadata":{"messageType":"USER"},"media":[],"text":"What is the capital of Bulgaria?\n\nEVALUATION FEEDBACK - Your previous response was flagged for not fully completing the task:\nAnswer the actual question asked. The capital of Bulgaria is Sofia. Provide this factual information directly instead of responding with unrelated references or jokes.\n\nIMPORTANT: Address the specific feedback above. Do NOT start over from scratch or delete existing work.\nMake incremental corrections to actually complete what was originally asked.\n"} 
 
-[MAIN] ASSISTANT:
+ASSISTANT:
  - {"messageType":"ASSISTANT","metadata":{"messageType":"ASSISTANT"},"toolCalls":[],"media":[],"text":"Sofia is the capital of Bulgaria."}
 ```
 
