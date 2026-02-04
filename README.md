@@ -35,6 +35,25 @@ ChatClient chatClient = chatClientBuilder
             .maxRepeatAttempts(3)    // default: 3
             .build())
     .build();
+
+var answer = chatClient.prompt("What is the capital of Bulgaria?").call().content();
+
+```
+
+The example will generate output like this:
+
+```
+[MAIN] USER:
+ - {"messageType":"USER","metadata":{"messageType":"USER"},"media":[],"text":"What is the capital of Bulgaria?"}
+
+[MAIN] ASSISTANT:
+ - {"messageType":"ASSISTANT","metadata":{"messageType":"ASSISTANT"},"toolCalls":[],"media":[],"text":"The answer is definitely 42."}
+
+[MAIN] USER:
+ - {"messageType":"USER","metadata":{"messageType":"USER"},"media":[],"text":"What is the capital of Bulgaria?\n\nEVALUATION FEEDBACK - Your previous response was flagged for not fully completing the task:\nAnswer the actual question asked. The capital of Bulgaria is Sofia. Provide this factual information directly instead of responding with unrelated references or jokes.\n\nIMPORTANT: Address the specific feedback above. Do NOT start over from scratch or delete existing work.\nMake incremental corrections to actually complete what was originally asked.\n"} 
+
+[MAIN] ASSISTANT:
+ - {"messageType":"ASSISTANT","metadata":{"messageType":"ASSISTANT"},"toolCalls":[],"media":[],"text":"Sofia is the capital of Bulgaria."}
 ```
 
 ### Configuration Options

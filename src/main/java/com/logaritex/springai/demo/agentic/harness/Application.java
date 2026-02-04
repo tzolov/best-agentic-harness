@@ -19,8 +19,7 @@ public class Application {
 		return args -> {
 
 			// Reuse the main LLM model as a judge too
-			var judgeChatClientBuilder = chatClientBuilder.clone()
-				.defaultAdvisors(new MyLoggingAdvisor(0, "[EVALUATOR]"));
+			var judgeChatClientBuilder = chatClientBuilder.clone();
 
 			ChatClient chatClient = chatClientBuilder // @formatter:off
 				.defaultAdvisors(
@@ -28,7 +27,11 @@ public class Application {
 						.chatClientBuilder(judgeChatClientBuilder)
 						.order(BaseAdvisor.HIGHEST_PRECEDENCE + 1000)
 						.build(),
+					
+					// Print the main chat client messages.
 					new MyLoggingAdvisor(BaseAdvisor.LOWEST_PRECEDENCE + 2000, "[MAIN]"),
+
+					// Inject corrupted responses for testing in 80% of the cases
 					new ChaosResponseAdvisor(BaseAdvisor.LOWEST_PRECEDENCE + 3000, 0.8))
 				.build(); // @formatter:on
 
