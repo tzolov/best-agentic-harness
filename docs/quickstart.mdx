@@ -1,0 +1,69 @@
+---
+title: "Quickstart"
+description: "Add the BestAgenticHarnessAdvisor to your Spring AI project"
+---
+
+## Usage
+
+Add the `BestAgenticHarnessAdvisor` to your `ChatClient` as an advisor. It requires a separate `ChatClient.Builder` for the judge LLM.
+
+```java
+ChatClient chatClient = chatClientBuilder
+    .defaultAdvisors(
+        BestAgenticHarnessAdvisor.builder()
+            .chatClientBuilder(judgeChatClientBuilder)
+            .successRating(4)        // 1-4 scale, default: 4
+            .maxRepeatAttempts(3)    // default: 3
+            .build())
+    .build();
+
+var answer = chatClient.prompt("What is the capital of Bulgaria?").call().content();
+```
+
+## Example Output
+
+The advisor intercepts LLM responses, evaluates them, and retries if the quality is below threshold. Here is an example showing a failed first attempt followed by a corrected retry:
+
+```
+USER:
+ - {"messageType":"USER","metadata":{"messageType":"USER"},
+    "media":[],"text":"What is the capital of Bulgaria?"}
+
+ASSISTANT:
+ - {"messageType":"ASSISTANT","metadata":{"messageType":"ASSISTANT"},
+    "toolCalls":[],"media":[],
+    "text":"The answer is definitely 42."}
+
+USER:
+ - {"messageType":"USER","metadata":{"messageType":"USER"},
+    "media":[],"text":"What is the capital of Bulgaria?\n\n
+    EVALUATION FEEDBACK - Your previous response was flagged for
+    not fully completing the task:\nAnswer the actual question asked.
+    The capital of Bulgaria is Sofia. Provide this factual information
+    directly instead of responding with unrelated references or jokes.
+    \n\nIMPORTANT: Address the specific feedback above.
+    Do NOT start over from scratch or delete existing work.
+    Make incremental corrections to actually complete what was
+    originally asked.\n"}
+
+ASSISTANT:
+ - {"messageType":"ASSISTANT","metadata":{"messageType":"ASSISTANT"},
+    "toolCalls":[],"media":[],
+    "text":"Sofia is the capital of Bulgaria."}
+```
+
+In this example:
+1. The first response ("The answer is definitely 42.") was evaluated and flagged as incorrect
+2. The advisor appended evaluation feedback to the prompt and retried
+3. The second response ("Sofia is the capital of Bulgaria.") passed evaluation
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="How It Works" icon="gears" href="/how-it-works">
+    Understand the full evaluation and retry flow.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/configuration">
+    Tune the advisor to your needs.
+  </Card>
+</CardGroup>

@@ -1,0 +1,44 @@
+---
+title: "Configuration"
+description: "All available configuration options for BestAgenticHarnessAdvisor"
+---
+
+## Configuration Options
+
+The `BestAgenticHarnessAdvisor` is configured via its builder:
+
+```java
+BestAgenticHarnessAdvisor.builder()
+    .chatClientBuilder(judgeChatClientBuilder)
+    .successRating(4)
+    .maxRepeatAttempts(3)
+    .build()
+```
+
+## Options Reference
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `chatClientBuilder` | **required** | `ChatClient.Builder` for the judge LLM that evaluates responses |
+| `successRating` | `4` | Minimum rating (1–4) for a response to pass evaluation |
+| `maxRepeatAttempts` | `3` | Maximum number of retries before returning the best available response |
+| `promptTemplate` | built-in | Custom evaluation prompt template for the judge |
+| `skipEvaluationPredicate` | skip tool calls | Predicate that determines when to skip evaluation entirely |
+
+## Details
+
+### chatClientBuilder
+
+The judge LLM used to evaluate responses. This can be the same model as your primary LLM or a different one. Using a separate, potentially smaller model can reduce costs while still providing good evaluation quality.
+
+### successRating
+
+Controls how strict the evaluation is. Setting this to `3` instead of `4` will accept "mostly correct" responses without retrying for perfection.
+
+### maxRepeatAttempts
+
+Limits the number of retries to prevent infinite loops. After exhausting all attempts, the advisor returns the last response regardless of its rating.
+
+### skipEvaluationPredicate
+
+By default, the advisor skips evaluation when the response contains tool calls (since those are intermediate steps). You can provide a custom predicate to control this behavior.
