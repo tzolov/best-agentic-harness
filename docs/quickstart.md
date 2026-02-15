@@ -1,7 +1,6 @@
----
-title: "Quickstart"
-description: "Add the BestAgenticHarnessAdvisor to your Spring AI project"
----
+# Quickstart
+
+Add the `BestAgenticHarnessAdvisor` to your Spring AI project.
 
 ## Usage
 
@@ -53,17 +52,29 @@ ASSISTANT:
 ```
 
 In this example:
+
 1. The first response ("The answer is definitely 42.") was evaluated and flagged as incorrect
 2. The advisor appended evaluation feedback to the prompt and retried
 3. The second response ("Sofia is the capital of Bulgaria.") passed evaluation
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="How It Works" icon="gears" href="/how-it-works">
+<div class="grid cards" markdown>
+
+-   :material-cog: **How It Works**
+
+    ---
+
     Understand the full evaluation and retry flow.
-  </Card>
-  <Card title="Configuration" icon="sliders" href="/configuration">
+
+    [:octicons-arrow-right-24: Learn more](how-it-works.md)
+
+-   :material-tune: **Configuration**
+
+    ---
+
     Tune the advisor to your needs.
-  </Card>
-</CardGroup>
+
+    [:octicons-arrow-right-24: Configure](configuration.md)
+
+</div>

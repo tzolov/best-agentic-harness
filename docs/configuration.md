@@ -1,7 +1,6 @@
----
-title: "Configuration"
-description: "All available configuration options for BestAgenticHarnessAdvisor"
----
+# Configuration
+
+All available configuration options for `BestAgenticHarnessAdvisor`.
 
 ## Configuration Options
 

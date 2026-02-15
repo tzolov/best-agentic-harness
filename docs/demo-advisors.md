@@ -1,7 +1,6 @@
----
-title: "Demo Advisors"
-description: "Included advisors for testing and demonstration"
----
+# Demo Advisors
+
+Included advisors for testing and demonstration.
 
 ## Overview
 
@@ -11,9 +10,9 @@ The following advisors are included for demonstration purposes only. They help t
 
 Randomly corrupts LLM responses to test the evaluation harness. This advisor intentionally produces bad responses so you can observe how the judge detects and retries them.
 
-<Warning>
-  This advisor is for **testing only**. Do not use it in production.
-</Warning>
+!!! warning
+
+    This advisor is for **testing only**. Do not use it in production.
 
 ## MyLoggingAdvisor
 

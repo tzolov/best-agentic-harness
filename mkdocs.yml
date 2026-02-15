@@ -1,0 +1,75 @@
+site_name: Best Agentic Harness
+site_url: https://tzolov.github.io/best-agentic-harness
+site_description: A Spring AI advisor that implements LLM-as-a-Judge evaluation with automatic retry
+repo_url: https://github.com/tzolov/best-agentic-harness
+repo_name: tzolov/best-agentic-harness
+
+theme:
+  name: material
+  favicon: images/favicon.svg
+  logo: images/mcp-java-logo.svg
+  palette:
+    - scheme: default
+      primary: green
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: green
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quickstart: quickstart.md
+  - Guide:
+    - How It Works: how-it-works.md
+    - Configuration: configuration.md
+    - Demo Advisors: demo-advisors.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/tzolov/best-agentic-harness
+      name: GitHub
+    - icon: fontawesome/solid/leaf
+      link: https://docs.spring.io/spring-ai/reference/
+      name: Spring AI
